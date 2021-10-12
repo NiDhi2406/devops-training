@@ -5,10 +5,6 @@ pipeline {
         timestamps()
     }
 
-//    triggers {
-//        cron('H/15 * * * *')
-//    }
-
     agent {
         label {
             label "${JENKINS_SLAVE_LABEL}"
@@ -60,6 +56,7 @@ pipeline {
                 }
             }
         }
+
 		stage('Setup Terraform') {
             steps {
                 script {
@@ -75,17 +72,19 @@ pipeline {
                     """
                 }
             }
+        }
+
 		stage('Install Nginx Using Ansible') {
             steps {
                 script {
                     sh """
-		    cd $WORKSPACE/devops-training/ansible
-		    echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
-		    ansible-playbook install-nginx.yml
+                    cd $WORKSPACE/devops-training/ansible
+                    echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
+                    ansible-playbook install-nginx.yml
                     """
                 }
             }
-        }         
+        }
     }
     
 	post {
