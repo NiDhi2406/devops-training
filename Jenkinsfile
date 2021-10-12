@@ -75,6 +75,16 @@ pipeline {
                     """
                 }
             }
+		stage('Install Nginx Using Ansible') {
+            steps {
+                script {
+                    sh """
+		    cd $WORKSPACE/devops-training/ansible
+		    echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
+		    ansible-playbook install-nginx.yml
+                    """
+                }
+            }
         }         
     }
     
