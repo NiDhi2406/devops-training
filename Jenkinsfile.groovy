@@ -79,8 +79,8 @@ pipeline {
                             --region us-east-1 \
                             --instance-id {}
                     done
-                    set -e
                     aws --profile default --region us-east-1 ec2 delete-key-pair --key-name UK-Sandbox-Key-Pair
+		    set -e
                     """
                 }
             }
@@ -91,7 +91,8 @@ pipeline {
 	
                     sh """
                     cd $WORKSPACE/devops-training/terraform
-		            terraform init
+		    terraform destroy
+		    terraform init
 
                     sed -i 's|  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDirdXxHIflCBYSrSUwLwtqYoXcLxLfjC9J+ScWZsnoFngTjk6FOFYrEzuaJ9VW9aWiUZTDSJ+7FNU7j1avpZPHj7c9DRVw4V1KkiuZrV24F/xGW17u5fPouQJ8MWtrQrs7erJqZN1bZNISs0TOXPR0+DOvltzzjzmjrNaw2gd5sDrCzBpyqyuUxuLUuIAFyqexe2YfCpVEbrWt+iPW2KOWZyC71eLiiiCNGsj0husabxwvqSN6Su/35hsR6InGoJGHcmqiDOVjIErK/7VSxbEJXjfun1+jvSnGQblEVqBYwo0vCGxwVtEIjbzi5KKRsB86H9jDznFiRx1IAFd0C5BLRCfggomi7UwIdg9HMGj+HscXqIuD9OWC+q3IuPZHNhQPNIACIccvbc3Ee4RtLhGwRM1ooLpsyoLOyGV0npKHhUoniElCWiD3p7opT2Z5gMR8lOYUW/JBvncMu4ZgkEiG9i21jLmM5NvoihOIWwtQbNWkBK1nmvhIJBzV7G2g5/s= jenkins@LAPTOP-PVIMTUA2"|  public_key = "$NEW_SSH_PUB_KEY"|g' main.tf
 
