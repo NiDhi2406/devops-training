@@ -18,11 +18,9 @@ resource "aws_instance" "NFS_SERVER" {
   ami           = "ami-0747bdcabd34c712a"
   instance_type = "t2.micro"
   key_name      = aws_key_pair.SSH_KEY_PAIR.id
-  security_groups = aws_default_security_group.default_sg
 
   # root disk
   root_block_device {
-    encrypted             = true
     delete_on_termination = true
   }
 
@@ -31,7 +29,6 @@ resource "aws_instance" "NFS_SERVER" {
     device_name           = "/dev/sdf"
     volume_size           = "90"
     volume_type           = "gp3"
-    encrypted             = true
     delete_on_termination = true
   }
 
@@ -41,12 +38,12 @@ resource "aws_instance" "NFS_SERVER" {
 }
 
 resource "aws_instance" "SYMANTEC_SERVER" {
-  ami           = "ami-0b0af3577fe5e3532"
+  ami           = "ami-0747bdcabd34c712a"
   instance_type = "t2.micro"
+  key_name      = aws_key_pair.SSH_KEY_PAIR.id
 
   # root disk
   root_block_device {
-    encrypted             = true
     delete_on_termination = true
   }
 
@@ -56,34 +53,18 @@ resource "aws_instance" "SYMANTEC_SERVER" {
 }
 
 resource "aws_instance" "APP_SERVER" {
-  ami           = "ami-0b0af3577fe5e3532"
+  ami           = "ami-0747bdcabd34c712a"
   instance_type = "t2.small"
   key_name      = aws_key_pair.SSH_KEY_PAIR.id
 
   # root disk
   root_block_device {
-    encrypted             = true
     delete_on_termination = true
   }
 
   tags = {
     Name = "UK-Sandbox-App-ASG"
   }
-}
-
-resource "aws_kms_key" "EBS_Encryption_Key" {
-  description               = "This key will be used to encrypt EBS volumes"
-  enable_key_rotation       = true
-  customer_master_key_spec  = "SYMMETRIC_DEFAULT"
-  
-  tags = {
-    Name = "UK-Sandbox-EBS-Encryption-KMS-Key"
-  }
-}
-
-resource "aws_kms_alias" "EBS_Encryption_Key" {
-  name          = "alias/UK-Sandbox-EBS-Encryption-KMS-Key"
-  target_key_id = aws_kms_key.EBS_Encryption_Key.key_id
 }
 
 resource "aws_key_pair" "SSH_KEY_PAIR" {
