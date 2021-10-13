@@ -31,8 +31,9 @@ resource "aws_instance" "NFS_SERVER" {
 }
 
 resource "aws_instance" "SYMANTEC_SERVER" {
-  ami           = "ami-0b0af3577fe5e3532"
+  ami           = "ami-0747bdcabd34c712a"
   instance_type = "t2.micro"
+  key_name      = aws_key_pair.SSH_KEY_PAIR.id
 
   # root disk
   root_block_device {
@@ -46,7 +47,7 @@ resource "aws_instance" "SYMANTEC_SERVER" {
 }
 
 resource "aws_instance" "APP_SERVER" {
-  ami           = "ami-0b0af3577fe5e3532"
+  ami           = "ami-0747bdcabd34c712a"
   instance_type = "t2.small"
   key_name      = aws_key_pair.SSH_KEY_PAIR.id
 
