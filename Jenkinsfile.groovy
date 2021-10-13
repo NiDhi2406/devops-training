@@ -103,7 +103,16 @@ pipeline {
                     sh """
                     cd $WORKSPACE/devops-training/ansible
                     GET_SECURITY_GROUP=`aws --profile default --region us-east-1 ec2 describe-security-groups --group-names default --query 'SecurityGroups[*].[GroupId]' --output text`
-                    aws --profile default --region us-east-1 ec2 authorize-security-group-ingress --group-id \$GET_SECURITY_GROUP --ip-permissions IpProtocol=icmp FromPort=0,ToPort=65535,IpRanges='[{CidrIp=0.0.0.0/0}]'
+		    aws --profile default --region us-east-1 ec2 authorize-security-group-ingress \
+		    --group-id \$GET_SECURITY_GROUP \
+		    --protocol tcp \
+		    --port 22 \
+		    --cidr 0.0.0.0/0
+		    aws --profile default --region us-east-1 ec2 authorize-security-group-ingress \
+		    --group-id \$GET_SECURITY_GROUP \
+		    --protocol tcp \
+		    --port 80 \
+		    --cidr 0.0.0.0/0
                     sudo sed -i '/myserver/d' /etc/hosts
                     sudo cat /dev/null > /var/lib/jenkins/.ssh/known_hosts
                     echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
