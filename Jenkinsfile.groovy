@@ -64,7 +64,7 @@ pipeline {
 
                     set -x
                     set +e
-                    for region in `aws ec2 describe-regions --output text | cut -f4`
+                    for region in `aws --profile default --region us-east-1 ec2 describe-regions --output text | cut -f4`
                     do
                     echo "Terminating region us-east-1..."
                     aws ec2 describe-instances --region us-east-1 | \
