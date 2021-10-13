@@ -59,7 +59,7 @@ pipeline {
 		stage('Setup Terraform') {
             steps {
                 script {
-		    APP_SERVER_PUBLIC_IP = sh (script: "aws ec2 --profile default --region us-east-1 describe-instances --filters \"Name=instance-state-name,Values=running\" \"Name=tag:Name,Values=UK-Sandbox-App-ASG\" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text", returnStdout: true ).trim()
+	
                     sh """
                     cd $WORKSPACE/devops-training/terraform
 		    terraform init
@@ -80,6 +80,7 @@ pipeline {
 		stage('Install Nginx Using Ansible') {
             steps {
                 script {
+			APP_SERVER_PUBLIC_IP = sh (script: "aws ec2 --profile default --region us-east-1 describe-instances --filters \"Name=instance-state-name,Values=running\" \"Name=tag:Name,Values=UK-Sandbox-App-ASG\" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text", returnStdout: true ).trim()
                     sh """
                     cd $WORKSPACE/devops-training/ansible
                     echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
