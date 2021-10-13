@@ -20,7 +20,6 @@ pipeline {
     environment {
         //Do not change below environment variables
         DATE = '`date +"%F-Time-%H-%M"`'
-        APP_SERVER_PUBLIC_IP = sh (script: "aws ec2 --profile default --region us-east-1 describe-instances --filters \"Name=instance-state-name,Values=running\" \"Name=tag:Name,Values=UK-Sandbox-App-ASG\" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text", returnStdout: true ).trim()
         NEW_SSH_PUB_KEY = sh (script: "cat /var/lib/jenkins/.ssh/id_rsa.pub", returnStdout: true ).trim()
     }
     
@@ -60,6 +59,7 @@ pipeline {
 		stage('Setup Terraform') {
             steps {
                 script {
+		    APP_SERVER_PUBLIC_IP = sh (script: "aws ec2 --profile default --region us-east-1 describe-instances --filters \"Name=instance-state-name,Values=running\" \"Name=tag:Name,Values=UK-Sandbox-App-ASG\" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text", returnStdout: true ).trim()
                     sh """
                     cd $WORKSPACE/devops-training/terraform
 		    terraform init
