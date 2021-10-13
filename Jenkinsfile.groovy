@@ -55,17 +55,43 @@ pipeline {
                 }
             }
         }
+		stage('Terminating Existing AWS Instances if any') {
+            steps {
+                script {
+	
+                    sh """
+                    #!/bin/bash
 
+                    set -x
+                    set +e
+                    for region in `aws ec2 describe-regions --output text | cut -f4`
+                    do
+                    echo "Terminating region us-east-1..."
+                    aws ec2 describe-instances --region us-east-1 | \
+                        jq -r .Reservations[].Instances[].InstanceId | \
+                        xargs -L 1 -I {} aws ec2 modify-instance-attribute \
+                            --region us-east-1 \
+                            --no-disable-api-termination \
+                            --instance-id {}
+                    aws ec2 describe-instances --region us-east-1 | \
+                        jq -r .Reservations[].Instances[].InstanceId | \
+                        xargs -L 1 -I {} aws ec2 terminate-instances \
+                            --region us-east-1 \
+                            --instance-id {}
+                    done
+                    set -e
+                    aws --profile default --region us-east-1 ec2 delete-key-pair --key-name UK-Sandbox-Key-Pair
+                    """
+                }
+            }
+        }
 		stage('Setup Terraform') {
             steps {
                 script {
 	
                     sh """
                     cd $WORKSPACE/devops-training/terraform
-		   
-		    terraform init
-		     terraform destroy
-		   
+		            terraform init
 
                     sed -i 's|  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDirdXxHIflCBYSrSUwLwtqYoXcLxLfjC9J+ScWZsnoFngTjk6FOFYrEzuaJ9VW9aWiUZTDSJ+7FNU7j1avpZPHj7c9DRVw4V1KkiuZrV24F/xGW17u5fPouQJ8MWtrQrs7erJqZN1bZNISs0TOXPR0+DOvltzzjzmjrNaw2gd5sDrCzBpyqyuUxuLUuIAFyqexe2YfCpVEbrWt+iPW2KOWZyC71eLiiiCNGsj0husabxwvqSN6Su/35hsR6InGoJGHcmqiDOVjIErK/7VSxbEJXjfun1+jvSnGQblEVqBYwo0vCGxwVtEIjbzi5KKRsB86H9jDznFiRx1IAFd0C5BLRCfggomi7UwIdg9HMGj+HscXqIuD9OWC+q3IuPZHNhQPNIACIccvbc3Ee4RtLhGwRM1ooLpsyoLOyGV0npKHhUoniElCWiD3p7opT2Z5gMR8lOYUW/JBvncMu4ZgkEiG9i21jLmM5NvoihOIWwtQbNWkBK1nmvhIJBzV7G2g5/s= jenkins@LAPTOP-PVIMTUA2"|  public_key = "$NEW_SSH_PUB_KEY"|g' main.tf
 
@@ -81,11 +107,13 @@ pipeline {
 		stage('Install Nginx Using Ansible') {
             steps {
                 script {
-		    APP_SERVER_PUBLIC_IP = sh (script: "aws ec2 --profile default --region us-east-1 describe-instances --filters \"Name=instance-state-name,Values=running\" \"Name=tag:Name,Values=UK-Sandbox-App-ASG\" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text", returnStdout: true ).trim()
+		            APP_SERVER_PUBLIC_IP = sh (script: "aws ec2 --profile default --region us-east-1 describe-instances --filters \"Name=instance-state-name,Values=running\" \"Name=tag:Name,Values=UK-Sandbox-App-ASG\" --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text", returnStdout: true ).trim()
                     sh """
                     cd $WORKSPACE/devops-training/ansible
-		    sudo sed -i '/myserver/d' /etc/hosts
-		    sudo cat /dev/null > /var/lib/jenkins/.ssh/known_hosts
+                    GET_SECURITY_GROUP=`aws --profile default --region us-east-1 ec2 describe-security-groups --group-names default --query 'SecurityGroups[*].[GroupId]' --output text`
+                    aws ec2 authorize-security-group-ingress --group-id \$GET_SECURITY_GROUP --ip-permissions IpProtocol=icmp FromPort=0,ToPort=65535,IpRanges='[{CidrIp=0.0.0.0/0}]'
+                    sudo sed -i '/myserver/d' /etc/hosts
+                    sudo cat /dev/null > /var/lib/jenkins/.ssh/known_hosts
                     echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
                     ansible-playbook install-nginx.yml
                     """
