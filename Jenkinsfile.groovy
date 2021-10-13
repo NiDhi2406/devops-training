@@ -64,8 +64,6 @@ pipeline {
 
                     set -x
                     set +e
-                    for region in `aws --profile default --region us-east-1 ec2 describe-regions --output text | cut -f4`
-                    do
                     echo "Terminating region us-east-1..."
                     aws ec2 describe-instances --region us-east-1 | \
                         jq -r .Reservations[].Instances[].InstanceId | \
@@ -73,12 +71,6 @@ pipeline {
                             --region us-east-1 \
                             --no-disable-api-termination \
                             --instance-id {}
-                    aws ec2 describe-instances --region us-east-1 | \
-                        jq -r .Reservations[].Instances[].InstanceId | \
-                        xargs -L 1 -I {} aws ec2 terminate-instances \
-                            --region us-east-1 \
-                            --instance-id {}
-                    done
                     aws --profile default --region us-east-1 ec2 delete-key-pair --key-name UK-Sandbox-Key-Pair
 		    set -e
                     """
