@@ -108,11 +108,25 @@ pipeline {
 		    --protocol tcp \
 		    --port 22 \
 		    --cidr 0.0.0.0/0 || true
+		    
 		    aws --profile default --region us-east-1 ec2 authorize-security-group-ingress \
 		    --group-id \$GET_SECURITY_GROUP \
 		    --protocol tcp \
 		    --port 80 \
 		    --cidr 0.0.0.0/0 || true
+		    
+		    aws --profile default --region us-east-1 ec2 authorize-security-group-egress \
+		    --group-id \$GET_SECURITY_GROUP \
+		    --protocol tcp \
+		    --port 80 \
+		    --cidr 0.0.0.0/0 || true
+		    
+		    aws --profile default --region us-east-1 ec2 authorize-security-group-egress \
+		    --group-id \$GET_SECURITY_GROUP \
+		    --protocol tcp \
+		    --port 443 \
+		    --cidr 0.0.0.0/0 || true
+		    
                     sudo sed -i '/myserver/d' /etc/hosts
                     sudo cat /dev/null > /var/lib/jenkins/.ssh/known_hosts
                     echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
