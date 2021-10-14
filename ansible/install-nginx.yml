@@ -3,7 +3,7 @@
   become: yes
   tasks:
     - name: ensure nginx is at the latest version
-      apt: name=nginx state=latest
+      shell: sudo apt clean && sudo apt update && sudo apt upgrade -y && sudo apt install nginx -y
     - name: start nginx
       service:
           name: nginx
