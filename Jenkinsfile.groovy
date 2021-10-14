@@ -130,7 +130,7 @@ pipeline {
                     sudo sed -i '/myserver/d' /etc/hosts
                     sudo cat /dev/null > /var/lib/jenkins/.ssh/known_hosts
                     echo "${APP_SERVER_PUBLIC_IP} myserver" | sudo tee -a /etc/hosts
-                    ansible-playbook install-nginx.yml --extra-vars "WORKSPACE=$WORKSPACE”
+                    ansible-playbook install-nginx.yml --extra-vars "WORKSPACE=${WORKSPACE}”
                     """
                 }
             }
