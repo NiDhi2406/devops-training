@@ -54,7 +54,7 @@ pipeline {
                     """
                 }
             }
-        }/*
+        }
 		stage('Terminating Existing AWS Instances if any') {
             steps {
                 script {
@@ -94,7 +94,7 @@ pipeline {
                     """
                 }
             }
-        }*/
+        }
 
 		stage('Install Nginx Using Ansible') {
             steps {
