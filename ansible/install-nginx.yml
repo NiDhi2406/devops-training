@@ -1,9 +1,18 @@
 ---
 - hosts: myserver
   become: yes
+  
+  vars:
+    - WORKSPACE: ""
+    
   tasks:
     - name: ensure nginx is at the latest version
-      shell: sudo apt clean && sudo apt update && sudo apt upgrade -y && sudo apt install nginx -y
+      shell: apt clean && apt update && apt upgrade -y && apt install nginx -y
+      
+    - name: Copy Website index.html to application server
+      copy:
+        src: "{{ WORKSPACE }}/devops-training/nginx-website/index.html"
+        dest: "/var/www/html"
     - name: start nginx
       service:
           name: nginx
