@@ -11,7 +11,7 @@
       
     - name: Copy Website index.html to application server
       copy:
-        src: "{{ WORKSPACE }}/devops-training/nginx-website/index.html"
+        src: "{{WORKSPACE}}/devops-training/nginx-website/index.html"
         dest: "/var/www/html"
     - name: start nginx
       service:
